@@ -50,19 +50,6 @@ export const SearchWrapper = styled.div`
 	overflow: hidden;
 	float: left;
 	position: relative;
-	.slide-enter {
-		width: 160px;
-		transition: all .2s ease-out;
-	}
-	.slide-enter-active {
-		width: 260px;
-	}
-	.slide-exit {
-		transition: all .2s ease-in;
-	}
-	.slide-exit-active {
-		width: 160px;
-	}
 	.iconfont {
 		position: absolute;
 		right: 5px;
@@ -98,6 +85,19 @@ export const NavSearch = styled.input.attrs({
 	}
 	&.focused {
 		width: 260px; 
+	}
+	&.slide-enter {
+		width: 160px;
+		transition: all .2s ease-out;
+	}
+	&.slide-enter-active {
+		width: 260px;
+	}
+	&.slide-exit {
+		transition: all .2s ease-in;
+	}
+	&.slide-exit-active {
+		width: 160px;
 	}
 `;
 
