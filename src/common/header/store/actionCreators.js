@@ -6,7 +6,8 @@ import axios from 'axios';
 const changeList = (data) => ({
 	type: actionTypes.CHANGE_LIST,
 	// transfer to immutable array
-	data: fromJS(data)
+	data: fromJS(data),
+	totalPage: Math.ceil(data.length / 10)
 });
 
 export const searchFocus = () => ({
@@ -29,4 +30,27 @@ export const getList = () => {
 				console.log('eee');
 			})
 	}
-}
+};
+
+export const mouseEnter = () => ({
+	type: actionTypes.MOUSE_ENTER
+});
+
+export const mouseLeave = () => ({
+	type: actionTypes.MOUSE_LEAVE
+
+});
+
+export const pageChange = (page) => ({
+	type: actionTypes.PAGE_CHANGE,
+	page
+});
+
+
+
+
+
+
+
+
+

@@ -124,7 +124,7 @@ class Header extends Component {
 								onBlur={handleInputBlur}
 							></NavSearch>
 						</CSSTransition>
-						<i className={this.props.focused ? 'focused iconfont' : 'iconfont'}>&#xe623;</i>
+						<i className={this.props.focused ? 'focused iconfont zoom' : 'iconfont zoom'}>&#xe623;</i>
 						
 						{this.getListArea()}
 
@@ -143,27 +143,47 @@ class Header extends Component {
 
 	getListArea() {
 
-		const { focused, list } = this.props;
+		const { 
+			focused, 
+			mouseIn,
+			list, 
+			page,
+			totalPage, 
+			handleMouseEnter,
+			handleMouseLeave,
+			handleChangePage } = this.props;
+		const newList = list.toJS(); // transfer to normal array
+		const pageList = [];
 
-		if(focused) {
+		// firstly get list by axios
+		if(newList.length) {
+
+			for(let i = (page - 1) * 10; i < page * 10; i++) {
+				// console.log(newList[i]);
+				pageList.push(
+					<SearchInfoItem key={newList[i]}>{newList[i]}</SearchInfoItem>
+				)
+			}
+		}
+
+		
+
+		if(focused || mouseIn) {
 			return (
 
-				<SearchInfo>
+				<SearchInfo 
+					onMouseEnter={handleMouseEnter}
+					onMouseLeave={handleMouseLeave} >
 					<SearchInfoTitle>
 						Hot Search
-						<SearchInfoSwitch>
+						<SearchInfoSwitch onClick={() => handleChangePage(page, totalPage, this.spinIcon)}>
+							<i ref={(icon) => {this.spinIcon = icon}} className="iconfont spin">&#xe851;</i>
 							Change
 						</SearchInfoSwitch>
 					</SearchInfoTitle>
 					<SearchInfoList>
-						{
-							list.map( (item) => {
-								return <SearchInfoItem key={item}>{item}</SearchInfoItem>
-							})
-						
-						}
-			
-					</SearchInfoList>
+						{pageList}
+			    </SearchInfoList>
 				</SearchInfo>
 			)
 		} else {
@@ -178,7 +198,10 @@ const mapStateToProps = (state) => {
 		// focused: state.header.focused
 		// focused: state.get('header').get('focused')
 		focused: state.getIn(['header', 'focused']),
-		list: state.getIn(['header', 'list'])
+		mouseIn: state.getIn(['header', 'mouseIn']),
+		list: state.getIn(['header', 'list']),
+		page: state.getIn(['header', 'page']),
+		totalPage: state.getIn(['header', 'totalPage'])
 	}
 }
 
@@ -194,6 +217,33 @@ const mapDispatchToProps = (dispatch) => {
 
 		handleInputBlur() {
 			dispatch(actionCreators.searchBlur());
+		},
+
+		handleMouseEnter() {
+			dispatch(actionCreators.mouseEnter())
+		},
+
+		handleMouseLeave() {
+			dispatch(actionCreators.mouseLeave())
+		},
+
+		handleChangePage(page, totalPage, spin) {
+
+			// use css transition transform to rotate
+			let originAngle = spin.style.transform.replace(/[^0-9]/ig, '');
+			if(originAngle) {
+				originAngle = parseInt(originAngle, 10);
+			} else {
+				originAngle = 0;
+			}
+			spin.style.transform = 'rotate(' + (originAngle + 360) +'deg)';
+			
+			// set page
+			if(page < totalPage) {
+				dispatch(actionCreators.pageChange(page + 1));
+			} else {
+				dispatch(actionCreators.pageChange(1));
+			} 
 		}
 	}
 }
