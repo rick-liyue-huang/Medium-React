@@ -3,7 +3,8 @@ import * as actionTypes from './actionTypes';
 import { fromJS } from 'immutable';
 
 const defaultStae = fromJS({
-	focused: false
+	focused: false,
+	list: []
 });
 
 export default (state = defaultStae, action) => {
@@ -22,6 +23,11 @@ export default (state = defaultStae, action) => {
 		/*{
 			focused: false
 		};*/
+	}
+
+	if(action.type === actionTypes.CHANGE_LIST) {
+		// console.log(action);
+		return state.set('list', action.data);
 	}
 
 
