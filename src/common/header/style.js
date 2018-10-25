@@ -128,6 +128,7 @@ export const SearchInfoSwitch = styled.div`
 		transition: all .2s ease-in;
 		transform-origin: center center;
 	}
+	cursor: pointer;
 `;
 
 export const SearchInfoList = styled.div`
