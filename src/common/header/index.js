@@ -4,6 +4,7 @@ import React, { PureComponent } from 'react';
 import { connect } from 'react-redux';
 import { CSSTransition } from 'react-transition-group';
 import { actionCreators } from './store';
+import { actionCreators as loginActionCreators } from '../../pages/login/store';
 import { Link } from 'react-router-dom';
 
 import {
@@ -101,7 +102,9 @@ class Header extends PureComponent {
 			focused, 
 			handleInputFocus, 
 			handleInputBlur,
-			list
+			list,
+			login,
+			logout
 		} = this.props;
 
 		return (
@@ -112,7 +115,12 @@ class Header extends PureComponent {
 				<Nav>
 					<NavItem className="left active">Home</NavItem>
 					<NavItem className="left">Download App</NavItem>
-					<NavItem className="right">Login</NavItem>
+					{
+						login ? 
+							<NavItem onClick={logout} className="right">Logout</NavItem>
+							:
+							<Link to="/login"><NavItem className="right">Login</NavItem></Link>
+					}
 					<NavItem className="right">
 						<i className="iconfont">&#xe636;</i>
 					</NavItem>
@@ -135,10 +143,12 @@ class Header extends PureComponent {
 					</SearchWrapper>	
 				</Nav>
 				<Addition>
+					<Link to="/write">
 					<Button className="write">
 						<i className="iconfont">&#xe617;</i>
 						Write
 					</Button>
+					</Link>
 					<Button className="reg">Register</Button>
 				</Addition>
 			</HeaderWrapper>
@@ -205,7 +215,8 @@ const mapStateToProps = (state) => {
 		mouseIn: state.getIn(['header', 'mouseIn']),
 		list: state.getIn(['header', 'list']),
 		page: state.getIn(['header', 'page']),
-		totalPage: state.getIn(['header', 'totalPage'])
+		totalPage: state.getIn(['header', 'totalPage']),
+		login: state.getIn(['login', 'login'])
 	}
 }
 
@@ -250,6 +261,10 @@ const mapDispatchToProps = (dispatch) => {
 			} else {
 				dispatch(actionCreators.pageChange(1));
 			} 
+		},
+
+		logout() {
+			dispatch(loginActionCreators.logout());
 		}
 	}
 }
