@@ -17,8 +17,10 @@ class App extends Component {
             <Header />
 	        	{/*<Route path="/" exact render={() => <div>Home</div>}></Route>*/}
 	        	<Route path="/" exact component={Home}></Route>
-	        	<Route path="/detail" exact component={Detail}></Route>
-        	</div>
+	        	<Route path="/detail/:id" exact component={Detail}></Route>
+          	{/*<Route path="/detail" exact component={Detail}></Route>*/}
+
+        </div>
         </BrowserRouter> 
       </Provider>
     );
