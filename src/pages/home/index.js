@@ -37,8 +37,7 @@ class Home extends Component {
 const mapDispatchToProps = (dispatch) => ({
 	
 	changeHomeData() {
-		const action = actionCreators.getHomeInfo();
-		dispatch(action);
+		dispatch(actionCreators.getHomeInfo());
 	}
 })
 
