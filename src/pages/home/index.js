@@ -1,5 +1,5 @@
 
-import React, { Component } from 'react';
+import React, { PureComponent,  } from 'react';
 import { connect } from 'react-redux';
 import { actionCreators } from './store';
 import { 
@@ -13,7 +13,10 @@ import {
  import Recommend from './components/Recommend';
  import Writer from './components/Writer';
 
-class Home extends Component {
+class Home extends PureComponent {
+
+	// PureComponent used for optimize the component
+
 	render() {
 		return (
 			<HomeWrapper>

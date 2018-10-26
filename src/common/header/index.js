@@ -1,9 +1,10 @@
 
-
-import React, { Component } from 'react';
+// PureComponent interactive with immutable
+import React, { PureComponent } from 'react';
 import { connect } from 'react-redux';
 import { CSSTransition } from 'react-transition-group';
 import { actionCreators } from './store';
+import { Link } from 'react-router-dom';
 
 import {
 	HeaderWrapper,
@@ -92,7 +93,7 @@ import {
 	
 }*/
 
-class Header extends Component {
+class Header extends PureComponent {
 
 	render() {
 
@@ -105,7 +106,9 @@ class Header extends Component {
 
 		return (
 			<HeaderWrapper>
-				<Logo />
+				<Link to="/">
+					<Logo />
+				</Link>
 				<Nav>
 					<NavItem className="left active">Home</NavItem>
 					<NavItem className="left">Download App</NavItem>
