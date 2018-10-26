@@ -44,6 +44,11 @@ export const getMoreList = (page) => {
 	}
 }
 
+export const toggleTopShow = (flag) => ({
+	type: actionTypes.TOGGLE_SCROLL_TOP,
+	flag
+})
+
 
 
 
