@@ -5,7 +5,7 @@ class App extends Component {
 
 	render() {
 		return (
-			<div>ok</div>
+			<div className='rick'>ok</div>
 		)
 	}
 }
