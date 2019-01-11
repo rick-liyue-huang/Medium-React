@@ -1,5 +1,6 @@
 
-import React, { Component } from 'react';
+import React, { /*Component*/ } from 'react';
+import { connect } from 'react-redux';
 import { CSSTransition } from 'react-transition-group';
 import { 
 	HeaderWrapper, 
@@ -11,7 +12,44 @@ import {
 	Button,
 	SearchWrapper } from './style';
 
-class Header extends Component {
+// stateless component (only contain 'render' function)
+const Header = (props) => {
+	return(
+			<HeaderWrapper>
+				<Logo>Medium</Logo>
+				<Nav>
+					<NavItem className='left active'>Home</NavItem>
+					<NavItem className='left'>App</NavItem>
+					<NavItem className='right'>
+						<i className='iconfont'>&#xe636;</i>
+					</NavItem>
+					<NavItem className='right'>Login</NavItem>					
+					<SearchWrapper>
+						<CSSTransition
+              in={props.focused}
+              timeout={300}
+              classNames="slide">
+							<NavSearch
+								className={props.focused ? 'focused': ''}
+								onFocus={props.handleInputFocus}
+								onBlur={props.handleInputBlur} >
+							</NavSearch>
+						</CSSTransition>
+						<i className={props.focused ? 'focused iconfont': 'iconfont'}>&#xe611;</i>
+					</SearchWrapper>
+				</Nav>
+				<Addition>
+					<Button className='writting'>
+						<i className='iconfont'>&#xe60f;</i>
+						Write
+					</Button>
+					<Button className='reg' >Register</Button>
+				</Addition>
+			</HeaderWrapper>
+		)
+}
+
+/*class Header extends Component {
 
 	constructor(props) {
 		super(props);
@@ -36,16 +74,16 @@ class Header extends Component {
 					<NavItem className='right'>Login</NavItem>					
 					<SearchWrapper>
 						<CSSTransition
-              in={this.state.focused}
-              timeout={500}
+              in={this.props.focused}
+              timeout={300}
               classNames="slide">
 							<NavSearch
-								className={this.state.focused ? 'focused': ''}
-								onFocus={this.handleInputFocus}
-								onBlur={this.handleInputBlur} >
+								className={this.props.focused ? 'focused': ''}
+								onFocus={this.props.handleInputFocus}
+								onBlur={this.props.handleInputBlur} >
 							</NavSearch>
 						</CSSTransition>
-						<i className={this.state.focused ? 'focused iconfont': 'iconfont'}>&#xe611;</i>
+						<i className={this.props.focused ? 'focused iconfont': 'iconfont'}>&#xe611;</i>
 					</SearchWrapper>
 				</Nav>
 				<Addition>
@@ -70,9 +108,33 @@ class Header extends Component {
 			focused: false
 		}))
 	}
-}
+}*/
 
-export default Header;
+const mapStateToProps = (state) => {
+	return {
+		focused: state.focused
+	}
+};
+
+const mapDispatchToProps = (dispatch) => {
+	return {
+		handleInputFocus() {
+			const action = {
+				type: 'search_focus'
+			};
+			dispatch(action);
+		},
+
+		handleInputBlur() {
+			const action = {
+				type: 'search_blur'
+			};
+			dispatch(action);
+		}
+	}
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(Header);
 
 
 
