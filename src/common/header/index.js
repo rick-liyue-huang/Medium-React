@@ -1,6 +1,6 @@
 
 /*
-	header component file including UI component here and state from 'store'
+	header component file including UI component and state from 'store'
 */
 import React, { /*Component*/ } from 'react';
 import { connect } from 'react-redux';
@@ -117,7 +117,11 @@ const Header = (props) => {
 
 const mapStateToProps = (state) => {
 	return {
-		focused: state.header.get('focused')
+		// focused: state.header.focused
+		// focused: state.header.get('focused')
+		// focused: state.get('header').get('focused')
+		focused: state.getIn(['header', 'focused'])
+
 	}
 };
 
