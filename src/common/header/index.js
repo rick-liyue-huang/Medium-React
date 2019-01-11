@@ -13,9 +13,40 @@ import {
 	NavSearch, 
 	Addition, 
 	Button,
-	SearchWrapper } from './style';
+	SearchWrapper,
+	SearchInfo,
+	SearchInfoTitle,
+	SearchInfoSwitch,
+	SearchInfoList,
+	SearchInfoItem } from './style';
 import { actionCreators } from './store';
 
+const getListArea = (show) => {
+	if(show) {
+		return (
+
+			<SearchInfo  >
+				<SearchInfoTitle>
+					Hot Topics
+					<SearchInfoSwitch>Change</SearchInfoSwitch>
+				</SearchInfoTitle>
+				<SearchInfoList>
+					<SearchInfoItem>Eduction</SearchInfoItem>
+					<SearchInfoItem>Eduction</SearchInfoItem>
+					<SearchInfoItem>Eduction</SearchInfoItem>
+					<SearchInfoItem>Eduction</SearchInfoItem>
+					<SearchInfoItem>Eduction</SearchInfoItem>
+					<SearchInfoItem>Eduction</SearchInfoItem>
+					<SearchInfoItem>Eduction</SearchInfoItem>
+					<SearchInfoItem>Eduction</SearchInfoItem>
+				</SearchInfoList>
+			</SearchInfo>
+
+		)
+	} else {
+		return null;
+	}
+}
 
 // stateless component (only contain 'render' function)
 const Header = (props) => {
@@ -41,6 +72,8 @@ const Header = (props) => {
 							</NavSearch>
 						</CSSTransition>
 						<i className={props.focused ? 'focused iconfont': 'iconfont'}>&#xe611;</i>
+					
+						{getListArea(props.focused)}
 					</SearchWrapper>
 				</Nav>
 				<Addition>
