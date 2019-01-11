@@ -1,4 +1,7 @@
 
+/*
+	header component style file
+*/ 
 import styled from 'styled-components';
 import logoPic from '../../staitcs/logo.png';
 

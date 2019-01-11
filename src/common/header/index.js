@@ -1,4 +1,7 @@
 
+/*
+	header component file including UI component here and state from 'store'
+*/
 import React, { /*Component*/ } from 'react';
 import { connect } from 'react-redux';
 import { CSSTransition } from 'react-transition-group';
@@ -11,6 +14,8 @@ import {
 	Addition, 
 	Button,
 	SearchWrapper } from './style';
+import { actionCreators } from './store';
+
 
 // stateless component (only contain 'render' function)
 const Header = (props) => {
@@ -112,23 +117,25 @@ const Header = (props) => {
 
 const mapStateToProps = (state) => {
 	return {
-		focused: state.focused
+		focused: state.header.focused
 	}
 };
 
 const mapDispatchToProps = (dispatch) => {
 	return {
 		handleInputFocus() {
-			const action = {
-				type: 'search_focus'
-			};
+			/*const action = {
+				type: SEARCH_FOCUS
+			};*/
+			const action = actionCreators.searchFocusAaction();
 			dispatch(action);
 		},
 
 		handleInputBlur() {
-			const action = {
-				type: 'search_blur'
-			};
+			/*const action = {
+				type: SEARCH_BLUR
+			};*/
+			const action = actionCreators.searchBlurAction();
 			dispatch(action);
 		}
 	}
