@@ -91,7 +91,7 @@ class Header extends Component {
 
 	render() {
 
-		const { focused, handleInputFocus, handleInputBlur } = this.props;
+		const { focused, handleInputFocus, handleInputBlur, list } = this.props;
 
 		return (
 			<HeaderWrapper>
@@ -110,11 +110,11 @@ class Header extends Component {
               classNames="slide">
 							<NavSearch
 								className={focused ? 'focused': ''}
-								onFocus={handleInputFocus}
+								onFocus={() => handleInputFocus(list)}
 								onBlur={handleInputBlur} >
 							</NavSearch>
 						</CSSTransition>
-						<i className={focused ? 'focused iconfont': 'iconfont'}>&#xe611;</i>
+						<i className={focused ? 'focused iconfont zoom': 'iconfont zoom'}>&#xe611;</i>
 					
 						{this.getListArea()}
 					</SearchWrapper>
@@ -146,7 +146,7 @@ class Header extends Component {
 		if(newList.length) {
 			for(let i = ((page - 1) * 10); i < page * 10; i++ ) {
 
-				console.log(newList[i]);
+				// console.log(newList[i]);
 				pageList.push(<SearchInfoItem
 										key={newList[i]} >{newList[i]}</SearchInfoItem>)
 			}
@@ -163,7 +163,11 @@ class Header extends Component {
 					<SearchInfoTitle>
 						Hot Topics
 						<SearchInfoSwitch
-							onClick={() => handleListChange(page, totalPage)} >Change</SearchInfoSwitch>
+							onClick={() => handleListChange(page, totalPage, this.spinIcon)}
+							 >
+							 <i ref={(icon) => {this.spinIcon = icon}} className='iconfont spin'>&#xe606;</i>
+
+							 Change</SearchInfoSwitch>
 					</SearchInfoTitle>
 					<SearchInfoList>
 						{
@@ -255,14 +259,17 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
 	return {
-		handleInputFocus() {
+		handleInputFocus(list) {
 			/*const action = {
 				type: SEARCH_FOCUS
 			};*/
 
 			/*get axios by redux-thunk */
-
-			dispatch(actionCreators.getList());
+			// console.log(list);
+			/*if(list.size === 0) {
+				dispatch(actionCreators.getList());
+			}*/
+			list.size === 0 && dispatch(actionCreators.getList());
 
 			dispatch(actionCreators.searchFocusAaction());
 		},
@@ -283,8 +290,17 @@ const mapDispatchToProps = (dispatch) => {
 			dispatch(actionCreators.mouseLeave());
 		},
 
-		handleListChange(page, totalPage) {
-			console.log(page, totalPage);
+		handleListChange(page, totalPage, spin) {
+			// console.log(page, totalPage, spin.style.transform);
+			// spin.style.transform = 'rotate(360deg)';
+			let originAngle = spin.style.transform.replace(/[^0-9]/ig, '');
+			if(originAngle) {
+				originAngle = parseInt(originAngle, 10);
+			} else {
+				originAngle = 0;
+			}
+			// console.log(originAngle);
+			spin.style.transform = 'rotate(' + (originAngle + 360) + 'deg)';
 
 			if(page < totalPage) {
 				dispatch(actionCreators.changePage(page+1));
