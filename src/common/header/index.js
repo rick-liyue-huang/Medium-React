@@ -2,9 +2,10 @@
 /*
 	header component file including UI component and state from 'store'
 */
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 import { connect } from 'react-redux';
 import { CSSTransition } from 'react-transition-group';
+import { Link } from 'react-router-dom';
 import { 
 	HeaderWrapper, 
 	Logo, 
@@ -20,6 +21,7 @@ import {
 	SearchInfoList,
 	SearchInfoItem } from './style';
 import { actionCreators } from './store';
+import { actionCreators as loginActionCreators } from '../../pages/login/store';
 
 /*const getListArea = (show) => {
 	if(show) {
@@ -87,22 +89,35 @@ import { actionCreators } from './store';
 		)
 }*/
 
-class Header extends Component {
+class Header extends PureComponent {
 
 	render() {
 
-		const { focused, handleInputFocus, handleInputBlur, list } = this.props;
+		const { 
+			focused, 
+			handleInputFocus, 
+			handleInputBlur, 
+			list,
+			login,
+			logout } = this.props;
 
 		return (
 			<HeaderWrapper>
+				<Link to='/'>
 				<Logo>Medium</Logo>
+				</Link>
 				<Nav>
 					<NavItem className='left active'>Home</NavItem>
 					<NavItem className='left'>App</NavItem>
+					
 					<NavItem className='right'>
 						<i className='iconfont'>&#xe636;</i>
 					</NavItem>
-					<NavItem className='right'>Login</NavItem>					
+					{
+						login ? 
+						 <NavItem onClick={logout} className='right'>Logout</NavItem>
+						 : <Link to='/login' ><NavItem className='right'>Login</NavItem></Link>
+					}				
 					<SearchWrapper>
 						<CSSTransition
               in={focused}
@@ -120,10 +135,12 @@ class Header extends Component {
 					</SearchWrapper>
 				</Nav>
 				<Addition>
-					<Button className='writting'>
-						<i className='iconfont'>&#xe60f;</i>
-						Write
-					</Button>
+					<Link to='/write'>
+						<Button className='writting'>
+							<i className='iconfont'>&#xe60f;</i>
+							Write
+						</Button>
+					</Link>
 					<Button className='reg' >Register</Button>
 				</Addition>
 			</HeaderWrapper>
@@ -253,7 +270,8 @@ const mapStateToProps = (state) => {
 		list: state.getIn(['header', 'list']),
 		page: state.getIn(['header', 'page']),
 		mouseIn: state.getIn(['header', 'mouseIn']),
-		totalPage: state.getIn(['header', 'totalPage'])
+		totalPage: state.getIn(['header', 'totalPage']),
+		login: state.getIn(['login', 'login'])
 	}
 };
 
@@ -307,6 +325,10 @@ const mapDispatchToProps = (dispatch) => {
 			} else {
 				dispatch(actionCreators.changePage(1));
 			}
+		},
+
+		logout() {
+			dispatch(loginActionCreators.logout());
 		}
 	}
 };

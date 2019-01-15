@@ -6,12 +6,13 @@ import styled from 'styled-components';
 import logoPic from '../../staitcs/logo.png';
 
 export const HeaderWrapper = styled.div`
+	z-index: 1;
 	height: 58px;
 	position: relative;
 	border-bottom: 1px solid #f0f0f0;
 `;
 
-export const Logo = styled.a.attrs({href: '/'})`
+export const Logo = styled.div`
 	height: 58px;
 	line-height: 58px;
 	width: 100px;
@@ -138,6 +139,7 @@ export const SearchInfo = styled.div`
 	width: 250px;
 	padding: 0 20px;
 	box-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
+	background: white;
 `;
 
 export const SearchInfoTitle = styled.div`
