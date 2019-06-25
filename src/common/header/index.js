@@ -2,8 +2,37 @@
 import React, { /*Component */} from 'react';
 import { connect } from 'react-redux';
 import { CSSTransition } from 'react-transition-group';
-import { HeaderWrapper, Logo, Nav, NavItem, NavSearch, SearchWrapper, Addition, Button } from './style';
+import { HeaderWrapper, Logo, Nav, NavItem, NavSearch, SearchWrapper, Addition, Button, SearchInfo, SearchInfoTitle, SearchInfoSwitch, SearchInfoItem, SearchInfoList } from './style';
 import { actionCreators } from './store';
+
+const getInfoListArea = (show) => {
+  if(show) {
+    return (
+      <SearchInfo>
+        <SearchInfoTitle>
+          Tot Topic
+          <SearchInfoSwitch>Change</SearchInfoSwitch>
+        </SearchInfoTitle>
+        <SearchInfoList>
+          <SearchInfoItem>edu</SearchInfoItem>
+          <SearchInfoItem>edu</SearchInfoItem>
+          <SearchInfoItem>edu</SearchInfoItem>
+          <SearchInfoItem>it</SearchInfoItem>
+          <SearchInfoItem>it</SearchInfoItem>
+          <SearchInfoItem>it</SearchInfoItem>
+          <SearchInfoItem>edu</SearchInfoItem>
+          <SearchInfoItem>edu</SearchInfoItem>
+          <SearchInfoItem>edu</SearchInfoItem>
+          <SearchInfoItem>it</SearchInfoItem>
+          <SearchInfoItem>it</SearchInfoItem>
+          <SearchInfoItem>it</SearchInfoItem>
+        </SearchInfoList>
+      </SearchInfo>
+    );
+  } else {
+    return null;
+  }
+}
 
 const Header = (props) => {
   return (
@@ -26,8 +55,8 @@ const Header = (props) => {
             onFocus={props.handleInputFocus}
             onBlur={props.handleInputBlur} ></NavSearch>
           </CSSTransition>
-          
           <i className={props.focused ? 'focused iconfont' : 'iconfont'} >&#xe607;</i>
+          { getInfoListArea(props.focused) }
         </SearchWrapper>
         
       </Nav>
@@ -87,7 +116,10 @@ class Header extends Component {
 */
 
 const mapStateToProps = (state) => ({
-  focused: state.header.focused
+  // focused: state.header.focused
+  // focused: state.header.get('focused')
+  // focused: state.get('header').get('focused')
+  focused: state.getIn(['header', 'focused'])
 });
 
 const mapDispatchToProps = (dispatch) => ({
