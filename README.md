@@ -9,6 +9,8 @@ Here, I will create a webApp, which is similar as Medium or Jianshu, and written
 
 #### Process
 
+npm install 'styled-components' and reset the global css style
+
 1. Create 'Header' component in 'header' directory, 
 2. Use the 'style.js' as style file by 'styled-components' frame.
 3. Create iconfonts by 'iconfont.cn', and import them in the project.
