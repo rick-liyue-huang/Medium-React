@@ -51,6 +51,7 @@ export const SearchWrapper = styled.div`
   float: left;
   overflow: hidden;
   position: relative;
+
   .iconfont {
     text-align: center;
     width: 30px;
@@ -59,6 +60,13 @@ export const SearchWrapper = styled.div`
     position: absolute;
     right: 5px;
     bottom: 5px;
+    
+    &.focused {
+      background: #777;
+      color: #fff;
+    }
+
+
   }
 `;
 
@@ -79,6 +87,23 @@ export const NavSearch = styled.input.attrs({
   color: #666;
   &::placeholder {
     color: #999;
+  }
+  // when has 'focused' classname
+  &.focused {
+    width: 260px;
+  }
+
+  &.slide-enter {
+    transition: all .2s ease-out;
+  }
+  &.slider-enter-active {
+    width: 260px;
+  }
+  &.slide-exit {
+    transition: all .2s ease-in;
+  }
+  &.slide-exit-active {
+    width: 160px;
   }
 `;
 
