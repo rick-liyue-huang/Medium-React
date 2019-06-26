@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import logoPicture from '../../staitcs/logo.png';
 
 export const HeaderWrapper = styled.div`
+  z-index: 10;
   height: 56px;
   position: relative;
   border-bottom: 1px solid #f0f0f0;
