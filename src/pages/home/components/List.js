@@ -1,26 +1,32 @@
 
-import React, { Component, Fragment } from 'react'
+import React, { PureComponent, Fragment } from 'react'
 import { connect } from 'react-redux';
-import  { ListItem, ListInfo } from '../style';
+import { Link } from 'react-router-dom';
+import  { ListItem, ListInfo, LoadMore } from '../style';
+import { actionCreators } from '../store';
 
-class List extends Component {
+class List extends PureComponent {
   render() {
-    const  { articleList } = this.props;
+    const  { articleList, handleGetMoreList, articlePage } = this.props;
     return (
       <Fragment>
         {
-          articleList.map((item) => {
+          articleList.map((item, index) => {
             return (
-              <ListItem key={item.get('id')}>
-                <img className='pic' src={item.get('imgUrl')} alt='' />
-                <ListInfo>
-                  <h3 className='title'>{item.get('title')}</h3>
-                  <p className='desc'>{item.get('desc')}</p>
-                </ListInfo>
-              </ListItem>
+              <Link key={index} to='/detail' >
+                <ListItem>
+                  <img className='pic' src={item.get('imgUrl')} alt='' />
+                  <ListInfo>
+                    <h3 className='title'>{item.get('title')}</h3>
+                    <p className='desc'>{item.get('desc')}</p>
+                  </ListInfo>
+                </ListItem>
+              </Link>
+              
             )
           })
         }
+        <LoadMore onClick={() => handleGetMoreList(articlePage)}>More List</LoadMore>
       </Fragment>
       
     )
@@ -28,7 +34,14 @@ class List extends Component {
 }
 
 const mapStateToProps = (state) => ({
-  articleList: state.getIn(['home', 'articleList'])
+  articleList: state.getIn(['home', 'articleList']),
+  articlePage: state.getIn(['home', 'articlePage'])
 })
 
-export default connect(mapStateToProps, null)(List);
+const mapDispatchToProps = (dispatch) => ({
+  handleGetMoreList (articlePage) {
+    dispatch(actionCreators.getThunkMoreListAction(articlePage));
+  }
+})
+
+export default connect(mapStateToProps, mapDispatchToProps)(List);
