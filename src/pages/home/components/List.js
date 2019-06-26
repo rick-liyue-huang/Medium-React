@@ -13,7 +13,7 @@ class List extends PureComponent {
         {
           articleList.map((item, index) => {
             return (
-              <Link key={index} to='/detail' >
+              <Link key={index} to={'/detail/' + item.get('id')} >
                 <ListItem>
                   <img className='pic' src={item.get('imgUrl')} alt='' />
                   <ListInfo>
@@ -45,3 +45,5 @@ const mapDispatchToProps = (dispatch) => ({
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(List);
+
+//   /detail?id=

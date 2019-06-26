@@ -8,9 +8,9 @@ const getDetailInfoAction = (data) => ({
   content: data.content
 });
 
-export const getThunkDetailInfoAction = () => {
+export const getThunkDetailInfoAction = (id) => {
   return (dispatch) => {
-    axios.get('/api/detail.json').then((res) => {
+    axios.get('/api/detail.json?id=' + id).then((res) => {
       dispatch(getDetailInfoAction(res.data.data));
 
     }).catch((e) => {})

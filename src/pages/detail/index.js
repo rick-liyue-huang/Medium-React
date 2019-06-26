@@ -5,7 +5,10 @@ import { DetailWrapper, DetailHeader, Content } from './style';
 import { actionCreators } from './store';
 
 class Detail extends PureComponent {
+  
   render() {
+    console.log(this.props.match.params.id);
+    // console.log(this.props.location.search);
     return (
       <DetailWrapper>
         <DetailHeader>
@@ -17,7 +20,7 @@ class Detail extends PureComponent {
   }
 
   componentDidMount() {
-    this.props.handleGetDetail()
+    this.props.handleGetDetail(this.props.match.params.id)
   }
 }
 
@@ -27,8 +30,8 @@ const mapStateToProps = (state) => ({
 });
 
 const mapDispatchToProps = (dispatch) => ({
-  handleGetDetail() {
-    dispatch(actionCreators.getThunkDetailInfoAction());
+  handleGetDetail(id) {
+    dispatch(actionCreators.getThunkDetailInfoAction(id));
   }
 })
 
