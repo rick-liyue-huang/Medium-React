@@ -1,6 +1,8 @@
 
 import React, { PureComponent } from 'react'
 import { connect } from 'react-redux';
+// match loadable.js
+import { withRouter } from 'react-router-dom';
 import { DetailWrapper, DetailHeader, Content } from './style';
 import { actionCreators } from './store';
 
@@ -35,4 +37,4 @@ const mapDispatchToProps = (dispatch) => ({
   }
 })
 
-export default connect(mapStateToProps, mapDispatchToProps)(Detail);
+export default connect(mapStateToProps, mapDispatchToProps)(withRouter(Detail));
