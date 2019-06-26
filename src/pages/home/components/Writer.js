@@ -1,13 +1,13 @@
 
 import React, { Component } from 'react'
-import { write } from 'fs';
+import { WriterWrapper } from '../style';
 
 class Writer extends Component {
   render() {
     return (
-      <div>
+      <WriterWrapper>
         Writer
-      </div>
+      </WriterWrapper>
     )
   }
 }

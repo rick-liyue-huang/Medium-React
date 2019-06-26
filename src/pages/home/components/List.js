@@ -5,11 +5,11 @@ import  { ListItem, ListInfo } from '../style';
 
 class List extends Component {
   render() {
-    const  { aritcleList } = this.props;
+    const  { articleList } = this.props;
     return (
       <Fragment>
         {
-          aritcleList.map((item) => {
+          articleList.map((item) => {
             return (
               <ListItem key={item.get('id')}>
                 <img className='pic' src={item.get('imgUrl')} alt='' />
@@ -28,7 +28,7 @@ class List extends Component {
 }
 
 const mapStateToProps = (state) => ({
-  aritcleList: state.getIn(['home', 'aritcleList'])
+  articleList: state.getIn(['home', 'articleList'])
 })
 
 export default connect(mapStateToProps, null)(List);
