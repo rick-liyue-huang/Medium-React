@@ -14,4 +14,4 @@ npm install 'styled-components' and reset the global css style
 1. Create 'Header' component in 'header' directory, 
 2. Use the 'style.js' as style file by 'styled-components' frame.
 3. Create iconfonts by 'iconfont.cn', and import them in the project.
-4.  
+4.  will reconstructor
