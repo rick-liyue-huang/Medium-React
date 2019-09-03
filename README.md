@@ -1,7 +1,7 @@
 
-### Before Rect Application
+## Before Rect Application
 
-#### Declarative programming
+### Declarative programming
 
 1. The difference between imperative and declarative programming;
 2. React components and their instances, and how React uses elements to control the UI flow;
@@ -487,6 +487,55 @@ Conditionals and loops are very common operations in UI templates and you may fe
   <SecretData />
 </If>
 ```
+
+#### Sub-rendering
+
+It is worth stressing that we always want to keep our components very small and our render methods very clean and simple. However, that is not an easy goal, especially when you are creating an application iternatively and in the first iteration you are not sure exactly how to split the components into smaller ones. So, what should we be doing when the render method becomes too big to maintain? One solution is to split it into smaller functions in a way that lets us keep all the logic in the same component. For example,
+
+```renderUserMenu() {
+  // JSX for user menu
+}
+
+renderAdminMenu() {
+  // JSX for admin menu
+}
+
+render() {
+  return (
+    <div>
+      <h1>Welcome back!</h1>
+      {this.userExists && this.renderUserMenu()}
+      {this.userIsAdmin && this.renderAdminMenu()}
+    </div>
+  )
+}
+```
+
+This is not always considered a best practice because it seems more obvious to split the component into smaller ones. However, sometimes it helos just to keep the render method cleaner. In the Redux realworld examples, a sub-render method is used to render the loading more button.
+
+
+### The basics of functional programming
+
+There is one more thing we can do to clean up our code: follow a Functional Programming (FP) style. Functional Programming is a declarative paradigm, where side-effects are avoided and data is considered immutale to make the code easier to maintain and to reason about. In javascript, functions are first-class objects, which means that they can be assigned to variables and passed as parameters to other functions. This allows us to introduce the concept of Higher-order Function (HoF). HoFs are functions that take a function as a parameter, optionally some other parameters, and return a function. The returned function is usually enhanced with some special behaviors. Let's look at a simple example where there is a function for adding two numbers and it gets enhanced with a function that first logs all the parameters and then executes the original one: `const add = (x, y) => x + y;`, and 
+
+```const log = func => (...args) => {
+  console.log(...args);
+  return func(...args)
+}
+const logAdd = log(add);
+```
+
+This concept is pretty important to understand because in the React world, a common pattern is to use Higher-order Components (HoC), treating our components as functions, and enhancing them with common behaviors. 
+
+
+#### Purity
+
+An important aspect of FP is to write pure functions. You will encounter this concept very often in the React ecosystem, especially if you look into libraries such as Redux. A function is pure when there are no sideeffects, which means that the function does not change anything that is not local to the functions itself. For example, a function that changes the state of an application, or modifies variables defined in the upper scope, or a function that touches externl entities, such as the DOM, is considered impure. Impure functions are harder to debug and most of the time it is not possible to apply them multiple times and expect to get the same result. Such as
+
+```let x = 0;
+const add = y => (x = x + y);
+```
+
 
 
 
