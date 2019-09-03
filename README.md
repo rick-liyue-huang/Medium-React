@@ -472,7 +472,8 @@ We pass the condition as the first parameter of the onlyIf function and when the
 
 A very common operation in UI development is to display lists of items. When it comes to showing lists, using javascript as a template language is a very good idea. If we write a function that returns an array inside our JSX template, each element of the array gets compiled into an element. We can use any javascript expressions inside curly braces and the most common way to generate an array of elements, given an array of objects, is to use map. To create an understand list to show the users, you can do the following:
 
-```<ul>
+```
+<ul>
   {users.map(user => <li>{user.name}</li>)}
 </ul>
 ```
@@ -483,7 +484,8 @@ This snippet is incredibly simple and incredibly powerful at the same time, wher
 
 Conditionals and loops are very common operations in UI templates and you may feel wrong using the javascript ternary or the map function to perform them. JSX has been built in such a way that it only abstracts the creation of the elements, leaving the logic parts to real javascript, which is great except that sometimes, the code becomes less clear. In general, we aim to remove all the logic from our components, and especially from our render methods, but sometimes we have to show and hide elements according to the state of the application, and very often we have to loop through collections and arrays. If you feel that using JSX for that kind of operation will make your code more readable, there is a Babel plugin available to do just that. A conditional statement written using the plugin looks like the following snippet:
 
-```<If condition={this.canShowSecretData}>
+```
+<If condition={this.canShowSecretData}>
   <SecretData />
 </If>
 ```
@@ -492,7 +494,8 @@ Conditionals and loops are very common operations in UI templates and you may fe
 
 It is worth stressing that we always want to keep our components very small and our render methods very clean and simple. However, that is not an easy goal, especially when you are creating an application iternatively and in the first iteration you are not sure exactly how to split the components into smaller ones. So, what should we be doing when the render method becomes too big to maintain? One solution is to split it into smaller functions in a way that lets us keep all the logic in the same component. For example,
 
-```renderUserMenu() {
+```
+renderUserMenu() {
   // JSX for user menu
 }
 
@@ -518,7 +521,8 @@ This is not always considered a best practice because it seems more obvious to s
 
 There is one more thing we can do to clean up our code: follow a Functional Programming (FP) style. Functional Programming is a declarative paradigm, where side-effects are avoided and data is considered immutale to make the code easier to maintain and to reason about. In javascript, functions are first-class objects, which means that they can be assigned to variables and passed as parameters to other functions. This allows us to introduce the concept of Higher-order Function (HoF). HoFs are functions that take a function as a parameter, optionally some other parameters, and return a function. The returned function is usually enhanced with some special behaviors. Let's look at a simple example where there is a function for adding two numbers and it gets enhanced with a function that first logs all the parameters and then executes the original one: `const add = (x, y) => x + y;`, and 
 
-```const log = func => (...args) => {
+```
+const log = func => (...args) => {
   console.log(...args);
   return func(...args)
 }
@@ -532,11 +536,65 @@ This concept is pretty important to understand because in the React world, a com
 
 An important aspect of FP is to write pure functions. You will encounter this concept very often in the React ecosystem, especially if you look into libraries such as Redux. A function is pure when there are no sideeffects, which means that the function does not change anything that is not local to the functions itself. For example, a function that changes the state of an application, or modifies variables defined in the upper scope, or a function that touches externl entities, such as the DOM, is considered impure. Impure functions are harder to debug and most of the time it is not possible to apply them multiple times and expect to get the same result. Such as
 
-```let x = 0;
+```
+let x = 0;
 const add = y => (x = x + y);
 ```
 
+#### Immutability
 
+We have seen how to write pure functions that donot mutate the state, but what if we need to change the value of a variable? In FP, a function, instead of changing the value of a variable, create a new variable with a new value and returns it. This way of working with data is called immutability.
+
+An immutable value is a value that cannot be changed.
+
+```
+const add3 = arr => arr.push(3);
+const myArr = [1, 2];
+add3(myArr); // [1, 2, 3]
+add3(myArr); // [1, 2, 3, 3]
+```
+
+The preceding function doesnot follow immutability because it changes the value of the given array. If we call the same function twice, we get different results.
+
+We can change the preceding function to make it immutable using concat, which return a new array without modifying the given one, we do it twice, they will return the same results.
+
+#### Currying
+
+A common technique in FP is currying. Currying is the process of converting a function that takes multiple arguments into a function that takes one argument at a time, return another function. Let's look at an example to clarify the concept. Instead of writing: `const add = (x, y) => x + y`,
+We define the function like this: `const add = x => y => x + y;`, and we use it in the following way:
+
+```
+const add1 = add(1)
+add1(2); // 3
+add1(3); // 4
+```
+
+This is a pretty convenient way of writing functions because since the value is stored after the application of the first parameter, we can reuse the second function multiple times.
+
+#### Composition
+
+An important concept in FP that can be applied to React is composition. Functions and components can be combined to produce new functions with more advanced features and properties. Consider that
+
+```
+const add = (x, y) => x + y;
+const square = x => x * x;
+
+const addAndSquare = (x, y) => square(add(x, y));
+```
+
+Following this paradigm, we end up with small, simple, testable pure functions that can be composed together.
+
+#### FP and user interfaces
+
+The last step to take is to learn how we can use FP to build UIs, which is what we use React for. We can think about a UI as a function to which is applied the state of the application, as follows: `UI = f(state)`. We expect this function to be idempotent, so that it returns the same UI given the same state of the application. Using React, we create our UIs using components we can consider functions, as we will see later. Components can be composed to form the final UI, which is a property of FP.
+
+#### Create truly reusable components
+
+To create truly reusable components we have to understand the different possibility that React gives us for defineing components and when it is better to choose one or another. A new type of component has been introduced in React which lets us declare a component as a stateless function. It is crucial to understand this component and learn when and why it should be used. The best way to learn is by seeing examples, and we will do that by starting from a component which serves a single purpose and transforming it into a reusable one. Let's first take a step back and revisit the basic concepts, so that we can move forward and create a living style guide of components.
+
+#### Creating classes
+
+Let's now look at the different ways in which we can define our components with React and the reasons why we should use one or other technique. 
 
 
 ## Simulated Medium (Jianshu) by React
