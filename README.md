@@ -1152,6 +1152,142 @@ Profile.propTypes = {
 
 You can create a Profile component by simply composing a Picture component to display the profile image and a UserName component to display the name and the screen name of the user. In this way, you can produce new parts of the user interface very quickly, writing only a few lines of code. Whenever you compose components, as in the preceding example, you share data between them using props. When a component passes some props to another component, it is called the Owner, irrespective of the parent-child relation between them. For example, in the preceding snippet, Profile is not the direct parent of Picture but Profile owns Picture because it passes down the props to it.
 
+
+#### Children
+
+There is a special prop that can be passed from the owners to the components defined inside their render method, it is called children. In the Rect documentation, it is described as opaque because it is a property that does not tell anything abou the value it contains. Subcomponents defined inside the render method of a parent component usually received props passed as attributes of the component iteself in JSX, or as a second parameter of the createElement. Components can be defined with nested components inside them, and they can access those children using the children prop. Consider that we have a Button component that has a text property representing the text of the button:
+
+```
+const Button = ({text}) => (
+  <button className='btn'>{text}</button>
+)
+Button.propTypes = {
+  text: React.PropTypes.string
+}
+```
+
+And it renders the following code: `<Button text='Click me' />`. In most cases, a good solution would be to add multiple parameters to the Button or to create different versions of the Button, each one with its single specialization, for example, IconButton. However, if we realie that our Button could be just a wrapper, and we want to be able to render any element inside it, we can use the children property. We can easily do that by changing the Button component from the preceding example to be similar to the following snippet:
+
+```
+const Button = ({ children }) => (
+  <button className='btn'>{children}</button>
+)
+Button.propTypes = {
+  children: React.PropTypes.array
+}
+```
+
+This is a pretty convenient way to allow components to accept any children elements and wrap thos elements inside a predefined parent. We can pass images, labels, and even other React component inside the Button and they will be rendered as its children. 
+
+```
+Button.propTypes = {
+  children: React.PropTypes.oneOfType([
+    React.PropTypes.array,
+    React.PropTypes.element
+  ]),
+}
+```
+
+#### Container and presentational pattern
+
+We will see how to apply a similar pattern to our components to make them more clean and maintainable. React components typically contain a mix of logic and presentation. By logic, we refer to anything that is unrelated to the UI, such as API calls, data manipulation, and event handlers. The presentation is, instead, the part inside the render method where we create the elements to be displayed on the UI. In React, there is a simple and powerful pattern, known as Container and Presentational, which we can apply when creating components that help us to seperate those two concerns. Creating well-defined boundaries between logic and presentational not only makes components more reusable, but it provies many other benefits. Suppose we have a component that uses geolocation APIs to get the position of the user and display the latitude and longitude on the page in the browser. We first create a geolocation.js file in our components folder and define the Geolocation component using a class: `class Geolocation extends React.Component`. We then define a constructor, where we initialize the internal state and bind the event handlers
+
+```
+constructor(props) {
+  super(props);
+  this.state = {
+    latitude: null,
+    longitude: null
+  }
+  this.handleSuccess = this.handleSuccess.bind(this);
+}
+```
+
+Now, we can use the componentDidMount callback to fire the request to the APIs:
+
+```
+componentDidMount() {
+  if(navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(this.handleSuccess)
+  }
+}
+
+handleSuccess({ coords }) {
+  this.setState({
+    latitude: coords.latitude,
+    longitude: coords.longitude
+  })
+}
+```
+
+Finally, we should the latitude and longitude using the render method:
+
+```
+render() {
+  return (
+    <div>
+      <div>Latitude: {this.state.latitude}</div>
+      <div>Longitude: {this.state.longitude}</div>
+    </div>
+  )
+}
+```
+
+It is important to note that, during the first render, latitude and longitude are null because we ask the browser for the coordinates when the component is monted. In a real-world component, you minght want to display a spinner until the data gets returned; to do that, you can use one of the conditional techniques. Container knows everything about the logic of the component and its where the APIs are called. It also deals with data manipulation, and event handling. The presentational component is where the UI is defined, and it receives data in the form of props from the container. Since the Presentational component is usually logic-less, we can create it as a functional stateless component. There are not rules that say that the Presentaional component must not have a state. For example, it could keep a UI state inside it. In this case, we just need a component to display the latitude and longitude, so we are going to use a simple function. First of all, we should rename our Geolocation component to GeolocationContainer: `class GeolocationContainer extends React.Component`. We will also change the filename from geolocation.js to geolocation-container.js. This rule is not strict, but it is best practice widely used in the React community to append Container to the end of the Container component name and give the original name to the Presentational one.
+
+```
+render() {
+  return (
+    <Geolocation {...this.state} />
+  )
+}
+```
+
+As you can see in the snippet, instead of creating the HTML elements inside the render methods of the container, we just use the Presentional one, we pass the state to it. The state has the latitude and longitude properties, which are null by default, and they contain the real position of the user when the browser has fired the callback. We are using the spread attribute operator, and it is a convenient way to pass the attributes of the state, avoiding writting prop by prop manually. A new file named geolocation.js,
+
+```
+const Geolocation = ({latitude, longitude}) => (
+  <div>
+    <div>Latitude: {latitude}</div>
+    <div>Longitude: {longitude}</div>
+  </div>
+)
+```
+
+Stateless functional components are an incredible elegant way to define UIs. They are pure functions that, given a state, return the element. We surely want to follow the best practices and define a clear interface for our component, so we use propTypes to declare the properties that the component needs
+
+```
+Geolocation.propTypes = {
+  latitude: React.PropTypes.number,
+  longitude: React.PropTypes.number
+}
+```
+
+Following the Container and Presentational pattern, we created a dumb reusable component that we can put in our Style guide, passing fake coordinates to it. If in some other parts of the application, we need to display the same data structure, we do not have to create a new component, we just wrap ths one into a new container that, for example, could load the latitude and longitude from a different endpoint. At the same time, other developers in our team can improve the container that use the geolocation by adding some error handling logic, without affecting the presentation. They can even build a temporary presentational component just to display and debug data and then replace it with the real presentational component when it is ready. Being able to work in parallel on the same component is a big win for teams, especailly for those companies where building interfaces is an iterative process. This pattern is simple but very powerful, and when applied to big applications it can make the difference when it comes to the speed of development and maintainability of the project. Deciding what to put in the container and what goes in the presentational is not always straightforward; the following points should help you make that decision, container components are more concerned about the behavior, they render their presentational components, they make API calls and manipulate data, they define event handlers, and they are written classes. While, presentional components are more concerned with the visual representation, they render the HTML markup or other components, they receive data from the parents in the form of props, and they are oftern written as stateless functional components.
+
+#### Mixins
+
+Components are great to achieve reusability, but what if different components in different domains share the same behavior. We do not want duplicated code in our applications, and React gives us a tool that we can use when we want to share functionalities across various components: mixins.
+
+#### Higher-order components
+
+We mentioned the concept of Higher-order Functoins (HoFs), which are functions that, given a function, enhance it with some extra behaviors, returning a new one. When we apply the idea of HoFs to components, we call it Higher-order Components (HoCs) for brevity. First of all, let's see what a HoC looks like: `const HoC = Component => EnhancedComponent`. HoCs are functions that take a component as input and return an enhanced one as the output. Suppose you need to attach to every component the same className property for some reason.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ## Simulated Medium (Jianshu) by React
 
 This is a app simulating Medium or Jianshu by React.
