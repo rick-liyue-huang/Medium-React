@@ -596,6 +596,295 @@ To create truly reusable components we have to understand the different possibil
 
 Let's now look at the different ways in which we can define our components with React and the reasons why we should use one or other technique. 
 
+#### The createClass factory
+
+Looking at the React documentation, the first example we find shows us how to define components using React.createClass.
+
+```
+const Button = React.createClass({
+  render() {
+    return <button />
+  };
+});
+```
+
+With the code above we created a button, and we can reference it inside other components in our application. We can change the snippet to use plain javascript as follow:
+
+```
+const Button = React.createClass({
+  render() {
+    return React.createElement('button);
+  };
+});
+```
+
+We can run th code everywhere without needing to use Babel for transpilling, which is a good way to start with React, avoiding the effect of learning different tools in the React ecosystem.
+
+##### Extending React.Component
+
+The second way to define a React component is by using the ES2015 classes. The class keyword is widely supported in modern browsers but we can safely transpile it with Babel, which supposedly, we already have in our stack if we are writing JSX. Let's see what it means to create the same button from the example above using a class:
+
+```
+class Button extends React.Component {
+  render() {
+    return <button />
+  }
+}
+```
+
+There are some major differences that we have to keep in mind when you decide to use one or another. Let's go through all of them in detail so you can have all the information you need to choose the best way for the needs of your team and your projects.
+
+#### Props
+
+The first defference is in how we can define the props that a component expects to receive and the default values for each one of the props. We will see how props work in detail further here, so lets now concentrate on how we can simply define them. With createClass we declare the props inside the object that we pass as a parameter to the function, and we use the getDefaultProps function to return the default value.
+
+```
+const Button = React.createClass({
+  propTypes: {
+    text: React.PropTypes.string,
+  },
+
+  getDefaultProps() {
+    return {
+      text: 'Click me'
+    }
+  },
+
+  render() {
+    return <button>{this.props.text}</button>
+  }
+})
+```
+
+As you can see, we use the propTypes attribute to list all the props that we can pass to the component. We then use the getDefaultProps function to define the values that the props are going to have by default and which will be overwritting by the props passed from the parent, if they are present. To achieve the same result using classes, we have to use a slightly different structure:
+
+```
+class Button extends React.Component {
+  render() {
+    return <button>{this.props.text}</button>
+  }
+}
+
+Button.propTypes = {
+  text: React.PropTypes.string
+}
+Button.defaultProps = {
+  text: 'Click me'
+}
+```
+
+Since Class Properties are still in draft, to define the properties of the class we have to set the attributes on the class itself after it has been created. S you can see in the example, the propTyps object is th same we used with createClass. When it comes to setting the default props instead, we used to use a function to return the default properties object, but with calsses we have to define a defaultProps attribut on the class and assign the default props to it. The good thing about using classes is that we just define propertis on th javascript onject without having to use React-specific functions such as getDefaultProps.
+
+#### State
+
+Another big difference between the createClass factory and the extends React.Component method, is the way you define the initial state of the components.
+
+```
+const Button = React.createClass({
+  getInitialState() {
+    return {
+      text: 'click me'
+    };
+  },
+
+  render() {
+    return <button>{this.state.text}</button>
+  }
+})
+```
+
+The getInitialState method expects an object with the default values for each one of the state properties. However, with classes we define our initial state using the state attribute of the instance and setting it inside the constructor method of the class:
+
+```
+class Button extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      text: 'click me'
+    }
+  }
+  render() {
+    return <button>{this.state.text}</button>
+  }
+}
+```
+
+These two ways of defining the state are equivalent but, with classes we just define properties on the instance without using any React-specific APIs, which is good. In ES2015, to use this in sub-classes, we first must call super. In the case of React we also pass the props to the parent.
+
+#### Autobinding
+
+createClass has a cool feature that is pretty convenient but it can also hide the way javascript works which is misleading, especially for beginners. This feature lets you create event handlers assuming that, when they get called, this references the component itself. Let's start with a simple example
+
+```
+const Button = React.createClass({
+  handleClick() {
+    console.log(this);
+  },
+  render() {
+    return <button onClick={this.handleClick} />
+  },
+})
+```
+
+With createClass, we can set an event handler in this way and rely on the fact that 'this' inside the function refers to the component itself. Because of this we can, for example, call other methods of the same component instance. Calling this.setState() or any other functions would work as expected. Let's now see how 'this' works differently with classes, and what we can do to create the same behavior. We could define a component in the following way, extending React.Component.
+
+```
+class Button extends React.Component {
+  handleClick() {
+    console.log(this);
+  }
+
+  render() {
+    return <button onClick={this.handleClick} />
+  }
+}
+```
+
+The result would be a null output in the console when the button is clicked. This is because our function gets passed to the event handler and we lose the reference to the component. That does not mean that we cannot use event handlers with classes, we just have to bind our functions manually. Let's see what solutions we can adopt and in which scenario we should prefer one or another. The new ES2015 arrow function automatically binds the current this to the body of the function.
+
+```
+() => this.setState();
+
+var _this = this;
+(function () {
+  return _this.setState();
+});
+```
+
+As you can imagine,m one possible solution to the autobinding problem is using the arrow function, let's see an example,
+
+```
+class Button extends React.Component {
+  handleClick() {
+    console.log(this);
+  }
+
+  render() {
+    return <button onClick={() => this.handleClick()}></button>
+  }
+}
+```
+
+This would work as expected without any particular problems. The only downside is that if we care about performance we have to understand what th code is doing. Binding a function inside the render method has, in fact, an unexpected side-effect because the arrow function gets fired every time the component is rendered. Firing a function inside the render multiple times, even if it is not optional, it is not a problem by itself. The issue is that, if we are passing the function down to a child component, it receives a new prop on each update which leads to inefficient rendering, and that represents a problem, especially if the component is pure. The best way to solve it is to bind the function inside the construction in a way that it doesn't ever change even if the component renders multiple times.
+
+```
+class Button extend React.Component {
+  constructor(props) {
+    super(props);
+
+    this.handleClick = this.handleClick.bind(this);
+  }
+
+  handleClick() {
+    console.log(this);
+  }
+
+  render() {
+    return <button onClick={this.handleClick} />
+  }
+}
+```
+
+#### Stateless functional components
+
+There is one more way to define our components, and it is very different from the previous two. This method has been introduced and it is very powerful because it makes the code easier to maintain and reuse. Let's see how it works and what it provides first, and then we will dig into the cases where one solution fits better than another. The syntax is particularly terse and elegant, lets's see an example: `() => <button />;`. The code above create an empty button and, thanks to the concise arrow function syntax, it is straightforwards and expressive. We only define a function that returns the elements to be displayed. We can of course use the JSX syntax inside the body of teh function.
+
+#### Props and context
+
+Components that are not able to receive any props from the parents are not particularly useful, and the stateless functional components can receive props as parameters: `props => <button>{props.text}</button>`. Alternatively, we can use an even more concise syntax with the ES2015 destructuring: `({ text }) => <button>{text}</button>`. We can define the props so that a stateless function can receive using propTypes attribute in a similar way as we do when we extend components:
+
+```
+const Button = ({ text }) => <button>{text}</button>
+Button.propTypes = {
+  text: React.PropTypes.string,
+}
+```
+
+Stateless functional components also receive a second parameter which represents the context:
+
+```
+(props, context) => (
+  <button>{context.currency}{props.value}</button>
+)
+```
+
+#### The this keyword
+
+One thing that makes the stateless functional components different from their stateful counterparts is the fact that 'this' does not represent the component durin their execution. For this reason it is not possible to use functions like setState or lifecycle methods that are associated with the component instance.
+
+#### State and Lifecycle
+
+The name stateless telss us clearly that the stateless functional components do not have any internal state, and the fact that this does not exist enforces it. That makes them extremely powerful and easy to use at the same time. The stateless functional components only receive props and context, and they return the elements. This should remind us of th principles of Functional Programming that we saw later. Stateless functional components do not provide any lefecycle hooks such as componentDidMount; they just implement a render-like method, and everything else has to be handled by the parent.
+
+#### Refs and event handlers
+
+Since there is not component instance, to use refs or event handlers with stateless functional components, you can define them in the following way:
+
+```
+() => {
+  let input;
+  const onClick = () => input.focus();
+  return (
+    <div>
+      <input ref={el => (input = el)} />
+      <button onClick={onClick}>Focus</button>
+    </div>
+  )
+}
+```
+
+#### No reference to component
+
+Another difference of the stateless functional components is that, whenever we render them using the ReactTestUtils, we do not receive back any reference to the component.
+
+```
+const Button = React.createClass({
+  render() {
+    return <button />
+  },
+});
+
+const component = ReactTestUtils.renderIntoDocument(<Button />)
+```
+
+#### Optimization
+
+One thing we should keep in mind when we use stateless functional components is that, even if Facebook developers say that in the future they would be able to provde performance optimizations for components without a state, at the time of writing, they perform a littel bit less well. In fact, the souldComponentUpdate function does not exist, and there is not a way to tell React that a functional component should not be rendered if the props are not changed. This is not a big issue.
+
+#### The state
+
+we have seen how to create a component with the factory, extending the React class or using stateless functional components. Let's now go deeper into the topic of state and see exactly why it is important to use it and find out how it works. We will learn when we should use stateless functions rather than stateful components and why that represents a fundamental decision in designing components.
+
+#### How it works
+
+Apart from the differences in declaring the initial state using the factory or extending the Component, the important concept we've learned is that each stateful React component can have an initial state. During the lifetime of the component, the state can be modified multiple times using setState inside lifecycle methods or event handlers. Every time the state changes, React renders the component again with the new state, which is why documentation often says that a Rect component is similar to a state machine. When the setState method is called with a new state, the object gets merged into the current state. For example, if we have an initial state as the following one:
+
+```
+this.state = {
+  text: 'click me'
+}
+```
+
+And we run setState with a new parameter: 
+
+```
+this.setState({
+  clicked: true
+})
+```
+
+The resulting state is: `{clicked: true, text: 'Click me'}`. Every time the state changes React runs the render function again, so there's no need for us to do anything other than setting the new state. However, in some cases, we may want to perform some operations when the state is updated, and React provides a callback for that:
+
+```
+this.setState({
+  clicked: true
+}, () => {
+  console.log('the state is now', this.state)
+});
+```
+
+If we pass any function as a second parameter of the setState, it gets fired when the state is updated, and the component has been rendered.
+
 
 ## Simulated Medium (Jianshu) by React
 
