@@ -885,6 +885,272 @@ this.setState({
 
 If we pass any function as a second parameter of the setState, it gets fired when the state is updated, and the component has been rendered.
 
+#### Asynchronous
+
+The setState function should always be considered asynchronous, as the official documentation says: There is no guarantee of synchronous operation of calls to setState[...]. In fact, if we try to log the current value of the state into the console after we fire setState in an event handler, we get the old state value:
+
+```
+handleClick() {
+  this.setState({
+    clicked: true
+  });
+  console.log('this state is now', this.state)
+}
+
+render() {
+  return <button onClick={this.handleClick}>Click me</button>
+}
+```
+
+Into the console, The reason why this happens is that React knows how to optimize the state update inside event handlers and it batches the operation for better perfromance, however, if we change our code a little:
+
+```
+handleClick() {
+  setTimeout(() => {
+    this.setState({
+      clicked: true
+    });
+
+    console.log('the state is now', this.state);
+  })
+}
+```
+
+#### Using the state
+
+Now that we know how the state works it is important to understand when it should be used and when we should avoid storing a value in the state. If we follow the rules, we can easily figure out whenever a component should be stateless or stateful and how to deal with the state to make our component reusable across the application. First of all, we should always keep in mind that only the minimal amount of data needed should be put into the state. For example, if we have to change a label when a button is clicked we should not store the text of the label, but we should only save a Boolean flag that tells us if the button has been clicked or not. In that way, we are using the state properly, and we can always recalculate different values according to it. Secondly, we should add to the state only the values that we want to update when an event happens, and for which we want to make the component re-render. The isClicked flag is an example of that, and another one could be the value of an input field before it gets submitted. In general, we should store into the state only information needed to keep track of the current user interface state, such as the currently selected tab of a tabbed menu. Another way to figure out whether the state is the right place to store information is to check if the data we are persisting is needed outside the component itself or by its children. If multiple components need to keep track of the same information, we should consider using a state manager like Redux at the application level. We will now look at the cases where we should avoid using the state if we want to follow best practive guideline.
+
+#### Derivables
+
+Every time we can compute the final value from the props, we should not store any data into the state. So for example, if we receive the currency and the price from the props, and we always show them together, we may think that it would be better to store it in the state and use the state value inside the render as follows:
+
+```
+class Price extends React.Component {
+  constructorO(props) {
+    super(props);
+
+    this.state = {
+      price: `${props.currency}${props.value}`
+    }
+  }
+
+  render() {
+    return <div>{this.state.price}</div>
+  }
+}
+
+<Price currency='$' value='100' />
+```
+
+The problem is that if the currency or the value change during the lifetime of the Price component, the state never gets recalculated (because the constructor is called once) and the application shows the wrong price. Therefore, we should use the props to calculate a value whenever we can. We could use a helper function directly in our render method:
+
+```
+getPrice() {
+  return `${this.props.currency}${this.props.value}`
+}
+```
+
+#### The render method
+
+We should always keep in mind that setting the state causes the component to re-render and, for that reason, we should store into the state only values that we are using inside the render method. For example, if we need to persist API subscriptions or timeout variables that we use inside our components but that do not affect the render in any way, we should consider keeping them in a separate module. The following code is wrong because we are storing a value in the state to use it later but we do not access it in our render method, and we fire an unnecessary render when we set the new state.
+
+```
+componentDidMount() {
+  this.setState({
+  request: API.get(...)
+  })
+}
+componentWillUnmount() {
+  this.state.request.abort()
+}
+```
+
+In a scenario like the previous one, it would be preferable to keep the API request stored in an external module. Another common solution for this kind of situation is to storing the request as a private member of the component instance:
+
+```
+componentDidMount() {
+  this.request = API.get(...)
+}
+componentWillUnmount() {
+  this.request.abort();
+}
+```
+
+In that way, the request is encapsulated into the component without affecting the state, so it does not trigger any additional rendering when the value changes. The following cheat sheet will help you take the right decisions
+
+#### Prop types
+
+Our goal is to write truly reusable components and to do that we have to define their interface in the clearest possible way. If we want our components to be reused across the application, it is crucial to make sure that our components and their parameters are well-defined and straightforward to use. With React, there is a powerful tool that lets us express, in a very simple way, the name of the props that a component expects to receive and some validation rules for each one of them. The rules relate to the type of the property as well as to whether the property is optional or required. There is also the option to write custom validation functions.
+
+```
+const Button = ({ text }) => <button>{text}</button>;
+Button.propTypes = {
+  text: React.PropTypes.string.isRequired
+}
+```
+
+It is important to say that the warning is emitted only in development mode. In the production version of React, the propTypes validation is disabled for performance reasons. The shape function lets us declare objects with nested properties and, for each one of those, we can define their types. For example, if we are creating a Profile component that needs a user object with a required name and an optional surname we can define it as follows:
+
+```
+const Profile = ({ user }) => (
+  <div>{user.name} {user.surname}</div>
+);
+
+Profile.propTypes = {
+  user: React.PropTypes.shap({
+    name: React.PropTypes.string.isRequired,
+    surname: React.PropTypes.string,
+    age: (props, propName) => {
+    if(!(props[propName] > 0 && props[propName] < 100>)) {
+      return new Error(`${propName} must be between 1 and 99`);
+    }
+    return null;
+  }
+  }).isRequired,
+  
+}
+```
+
+#### Reusable components
+
+We have seen what are the best ways to create components and the scenarios where it makes sense to use a logical state. We have also seen how we can make our components reusable defining a clear interface with prop types. Let's now dive into a real world example and take a look at how we can transform a non-reusable component into a reusable one with a generic and cleaner interface. Suppose we have a component that loads a collection of posts from an API endpoint, and it shows the list on the screen. It is a simplified example, but it is useful for understanding the necessary steps we need to take to make components reusable. The component is defined as follows: `class PostList extends React.Component`. With the constructor and a life cycle method:
+
+```
+constructor(props) {
+  super(props);
+  this.state = {
+    posts: []
+  }
+}
+
+componentDidMount() {
+  Post.fetch().then(posts => {
+    this.setState({posts})
+  })
+}
+```
+
+An empty array gets assigned to posts to posts to represent the initial state. During componentDidMount, the API gets fired, and as soon as the data is available, the posts are stored in the state. This is a very common data fetching pattern, and we will see the other possible approaches later. Posts is a helper class that we use to communicate with the API, and it has a fetch method which returns a Promise that gets resolved with a list of posts, We can now move into the part where the posts are displayed:
+
+```
+render() {
+  return (
+    <ul>
+      {
+        this.state.posts.map(post => (
+          <li key={post.id}>
+            <h1>{post.title}</h1>
+            {post.excerpt && <p>{post.excerpt}</p>}
+          </li>
+        ))
+      }
+    </ul>
+  )
+}
+```
+
+Inside the render method, we loop through the posts, and we map each one of them into a <li> element. We assume that the title field is always present, and we show it inside an <h1> while the excerpt is optional, and we show it inside a paragraph only if it exists. The above component works fine, and it has no problems. Now, suppose that we need to render a similar list but this time, we want to display a list of users received from the props rather than the state
+
+```
+const UserList = ({ users }) => (
+  <ul>
+    {
+      users.map(user => (
+        <li key={user.id}>
+          <h1>{user.username}</h1>
+          {user.bio && <p>{user.bio}</p>}
+        </li>
+      ))
+    }
+  </ul>
+)
+```
+
+Given a collection of users, the code above renders an unordered list very similar to the posts one. The differences are that the heading, in this case, is the username rather than title and the optional field, that has to be shown only if present, is the bio of the user.
+
+Duplicating the code is usually not the best solution so let's see how React can help us to keep our code DON'T REPEAT YOURSELF (DRY). The first step to creating a reusable list component is to abstract it a little and decouple it from the data it has to display and we do that by defining a generic collection property. The main requirement is that, for the posts, we want to display the title and excerpt; while for the users, we have to show the username and the bio. For doing that, we create two props: one called titleKey where we specify the name of the attribute to be displayed and one called textKey that we use to specify the optional field. The props of the new reusable List are the following:
+
+```
+List.propTypes ={
+  collection: React.PropTypes.array,
+  textKey: React.PropTypes.string,
+  titleKey: React.PropTypes.string
+}
+```
+
+Since the List is not going to have any state or function, we can write it as a stateless functional component:
+
+```
+const List = ({ collection, textKey, titleKey }) => (
+  <ul>
+    {
+      collection.map(item => 
+        <Item
+          key={item.id}
+          text={item[textKey]}
+          title={item[titleKey]} /> )
+    }
+  </ul>
+)
+```
+
+The List receives the props, and iterate over the collection, mapping all the items into another component. As you can see, we are passing to the children titles and text props which represent the values of the main attribute and the optional one, respectively. The Item component is very simple and clean: 
+
+```
+const Item = ({ text, title }) => (
+  <li>
+    <h1>{title}</h1>
+    {text && <p>{text}</p>}
+  </li>
+);
+
+Item.propTypes = {
+  text: React.PropTypes.string,
+  title: React.PropTypes.string
+}
+```
+
+So we've create two components with a well-defined surface area which can use together to display posts, users or any other kinds of lists. Smaller components are better for several reasons: for example, they are more maintainable and testable which make it easier to find and fix bugs. Great, we can now rewrite our two components, PostList and UserList, to make them use the generic reusable list and avoid duplicating code. Let's modify the render method of PostsLists as follows:
+
+```
+render() {
+  return (
+    <List 
+      collection={this.state.posts}
+      textKey='excerpt'
+      titleKey='title' />
+  )
+}
+
+const UserList = ({ users }) => (
+  <List 
+    collection={users}
+    textKey='bio'
+    titleKey='username' />
+)
+```
+
+We went from a single-purpose component to a reusable one using the props to create a generic and well-defined interface. It is now possible to reuse this component as many times as we need in our application and every developer can easily understand how to implement it thanks to the prop types. We could also go a step further using react-docgen to document our reusable list, as we have seen in the previous section. The benefits of using a reusable component over a component which is coupled with the data it handles are many. Suppose, for example, that we want to add logic to hide and show the optional field only when a button is clicked. Alternatively, perhaps there is a new requirement to add a check and, if the title attribute is longer than twenty five characters, it gets cut and hyphenate. We can now make the change at one single point, and all the components that are using it will benefit from the modification.
+
+
+### Compose all the things
+
+It is time to learn how to make those components communicate with each other effectively. React is so powerful because it lets you build complex applications composing small, testable, and maintainable components. Applying this paradigm, you can take control of every single part of the application. Reusing functions is one of our goals as developers, and have seen how React makes it easy to create reusable components. Reusable components can be shared across multiple domains of your application to avoid duplication. Composing React components is pretty straightforward, you just have to include them in the render method:
+
+```
+const Profile = ({ user }) => (
+  <div>
+    <Picture profileImageUrl={user.profileImageUrl} />
+    <UserName name={user.name} screenName={user.screenName} />
+  </div>
+)
+
+Profile.propTypes = {
+  user: React.PropTypes.object
+}
+```
+
+You can create a Profile component by simply composing a Picture component to display the profile image and a UserName component to display the name and the screen name of the user. In this way, you can produce new parts of the user interface very quickly, writing only a few lines of code. Whenever you compose components, as in the preceding example, you share data between them using props. When a component passes some props to another component, it is called the Owner, irrespective of the parent-child relation between them. For example, in the preceding snippet, Profile is not the direct parent of Picture but Profile owns Picture because it passes down the props to it.
 
 ## Simulated Medium (Jianshu) by React
 
