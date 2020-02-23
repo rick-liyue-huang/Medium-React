@@ -1305,3 +1305,4 @@ npm install 'styled-components' and reset the global css style
 3. Create iconfonts by 'iconfont.cn', and import them in the project.
 4.  will reconstructor
 
+continue....
